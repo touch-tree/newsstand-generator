@@ -7,7 +7,7 @@ use Framework\Component\View;
 use App\Services\PdfService;
 use Framework\Routing\Controller;
 
-class DashboardController extends Controller
+class DefaultController extends Controller
 {
     /**
      * PdfService instance.
@@ -32,7 +32,7 @@ class DashboardController extends Controller
      * @param DefaultRequest $request
      * @return View
      */
-    public function home(DefaultRequest $request): View
+    public function default(DefaultRequest $request): View
     {
         return view('home');
     }

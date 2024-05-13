@@ -12,6 +12,7 @@
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\DefaultController;
 use Framework\Support\Helpers\Router;
 
-Router::get('/', ['App\Http\Controllers\DashboardController', 'home'])->name('home');
+Router::get('/', [DefaultController::class, 'default'])->name('default');

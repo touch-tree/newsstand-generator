@@ -13,6 +13,7 @@
 
 use Framework\Component\Application;
 use Framework\Component\Config\ConfigRepository;
+use Framework\Component\Container;
 use Framework\Component\View;
 use Framework\Http\HeaderBag;
 use Framework\Http\Redirector;
@@ -360,3 +361,4 @@ if (!function_exists('asset')) {
         return Application::get_instance()->get(UrlGenerator::class)->to('public/') . trim($path, '/');
     }
 }
+

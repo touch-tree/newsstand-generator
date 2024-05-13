@@ -13,7 +13,6 @@
 
 use Framework\Component\Application;
 use Framework\Component\Config\ConfigRepository;
-use Framework\Component\Container;
 use Framework\Component\View;
 use Framework\Http\HeaderBag;
 use Framework\Http\Redirector;

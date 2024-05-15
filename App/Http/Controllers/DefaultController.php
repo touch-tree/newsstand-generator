@@ -2,62 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DefaultRequest;
 use Framework\Component\View;
-use App\Services\PdfService;
 use Framework\Routing\Controller;
 use Framework\Http\Request;
-use Framework\Http\Response;
+use Framework\Support\Facades\File;
+use Framework\Support\Str;
 
 class DefaultController extends Controller
 {
     /**
-     * PdfService instance.
-     *
-     * @var PdfService
-     */
-    private PdfService $pdf_service;
-
-    /**
-     * DashboardController constructor.
-     *
-     * @param PdfService $pdf_service PdfService instance.
-     */
-    public function __construct(PdfService $pdf_service)
-    {
-        $this->pdf_service = $pdf_service;
-    }
-
-    /**
      * Default view.
      *
-     * @param DefaultRequest $request
+     * @param Request $request
      * @return View
      */
-    public function default(DefaultRequest $request): View
+    public function default(Request $request): View
     {
-        return view('home');
-    }
+        $images = File::all_files('C:\Users\JoshAgripo\Desktop\687');
+        $contents = File::all_files('C:\Users\JoshAgripo\Desktop\htmlversion');
 
-    /**
-     * Handles the uploading and conversion of a PDF file to HTML.
-     *
-     * @param Request $request The HTTP request object.
-     * @return Response Returns a response with HTML content or an error message.
-     */
-    public function upload_pdf(Request $request): Response
-    {
-        $file = $request->file('pdfFile');
+        $pages = [];
 
-        if ($file !== null) {
-            $path = $file->path();
-            $outputHtmlPath = tempnam(sys_get_temp_dir(), 'pdfToHtml') . '.html';
-            
-            $html = $this->pdf_service->to_html($path, $outputHtmlPath, 1);
+        foreach ($images as $file) {
+            $filename = pathinfo($file->getPathname(), PATHINFO_FILENAME);
 
-            return response($html);
+            if (Str::starts_with($filename, 'page_medium')) {
+                $id = Str::replace(['page_medium' => ''], $filename);
+
+                File::copy($file->getPathname(), $path = public_path('temp/page_medium_' . $id . '.jpg'));
+
+                $pages[$id]['image']['medium'] = $path;
+
+                continue;
+            }
+
+            if (Str::starts_with($filename, 'page_thumb')) {
+                $id = Str::replace(['page_thumb' => ''], $filename);
+
+                File::copy($file->getPathname(), $path = public_path('temp/page_thumb_' . $id . '.jpg'));
+
+                $pages[$id]['image']['small'] = $path;
+
+                continue;
+            }
+
+            $id = Str::replace(['page' => ''], $filename);
+
+            File::copy($file->getPathname(), $path = public_path('temp/page_' . $id . '.jpg'));
+
+            $pages[$id] = [
+                'image' => [
+                    'large' => $path
+                ],
+                'file' => [
+                    'path' => '',
+                    'content' => ''
+                ],
+            ];
         }
 
-        return response('File upload error', 400);
+        foreach ($contents as $file) {
+            $filename = pathinfo($file->getPathname(), PATHINFO_FILENAME);
+
+            $id = Str::replace(['page' => ''], $filename);
+
+            $pages[$id]['file'] = [
+                'path' => $file->getPathname(),
+                'content' => file_get_contents($file->getPathname())
+            ];
+        }
+
+        return view('default', [
+            'pages' => $pages
+        ]);
     }
 }

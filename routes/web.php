@@ -13,7 +13,6 @@
 */
 
 use App\Http\Controllers\DefaultController;
-use Framework\Support\Helpers\Router;
+use Framework\Support\Facades\Router;
 
 Router::get('/', [DefaultController::class, 'default'])->name('default');
-Router::post('/upload-pdf', [DefaultController::class, 'upload_pdf']);

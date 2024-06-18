@@ -13,6 +13,7 @@
 */
 
 use App\Http\Controllers\DefaultController;
-use Framework\Support\Facades\Router;
+use Framework\Support\Facades\Route;
 
-Router::get('/', [DefaultController::class, 'default'])->name('default');
+Route::get('/', [DefaultController::class, 'default'])->name('default');
+Route::post('/content', [DefaultController::class, 'content']);

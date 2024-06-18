@@ -12,48 +12,32 @@
 
 <body>
 
-<div class="editor">
-    <?php foreach ($pages ?? [] as $id => $page) { ?>
-        <div class="editor-section">
-            <div class="editor-section__screen">
-                <img class="lazy-load" data-src="<?php echo url('public/temp/page_' . $id . '.jpg') ?>" alt="" src="">
-            </div>
-            <div class="editor-section__controls">
-                <!-- Placeholder content -->
-            </div>
-            <!-- Add a data attribute with the URL to load the content lazily -->
-            <div class="lazy-load-content" data-src="<?php echo url('load-content/' . $id) ?>"></div>
-        </div>
-    <?php } ?>
+<div class="header">
+    <button>Exit</button>
+    <button>Save</button>
+    <button>Export</button>
 </div>
 
-<script>
-    $(document).ready(function () {
-        const lazyloadSections = $(".lazy-load-content");
-
-        $(window).scroll(function () {
-            const scrollTop = $(this).scrollTop();
-
-            lazyloadSections.each(function () {
-                const section = $(this);
-                if (section.offset().top < (window.innerHeight + scrollTop)) {
-                    if (!section.hasClass('loaded')) {
-                        $.get(section.data("src"), function (data) {
-                            section.html(data);
-                            section.addClass('loaded');
-                        }).fail(function (error) {
-                            console.error('Error loading content:', error);
-                        });
-                    }
-                }
-            });
-
-            if (lazyloadSections.length === 0) {
-                $(window).off("scroll");
-            }
-        });
-    });
-</script>
+<div class="editor">
+    <?php if (isset($article_id)) { ?>
+        <?php foreach ($pages ?? [] as $id => $page) { ?>
+            <div class="editor-section" id="page<?php echo $id ?>">
+                <div class="editor-section__screen">
+                    <img class="lazy-load"
+                         data-src="<?php echo asset('images/' . $article_id . '/page' . $id . '.jpg') ?>"
+                         alt=""
+                         src="">
+                </div>
+                <div class="editor-section__controls">
+                    <div class="lazy-load-content control-container"
+                         data-src="<?php echo url('content/', ['article_id' => $article_id, 'id' => $id]); ?>"></div>
+                </div>
+            </div>
+        <?php } ?>
+    <?php } else { ?>
+        <div>No article_id provided</div>
+    <?php } ?>
+</div>
 
 <?php render_view('partials.footer'); ?>
 

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Framework\Support\Str;
+use Framework\Http\Request;
+use Framework\Http\Response;
 use Framework\Component\View;
 use Framework\Routing\Controller;
-use Framework\Http\Request;
+use Framework\Routing\Generator\RouteUrlGenerator;
 use Framework\Support\Facades\File;
-use Framework\Support\Str;
 
 class DefaultController extends Controller
 {
@@ -18,41 +20,42 @@ class DefaultController extends Controller
      */
     public function default(Request $request): View
     {
-        $images = File::all_files('C:\Users\JoshAgripo\Desktop\687');
-        $contents = File::all_files('C:\Users\JoshAgripo\Desktop\htmlversion');
+        $page_id = $request->get('page_id');
+        $article_id = $request->get('article_id');
+
+        if (!$article_id) {
+            return view('default', [
+                'article_id' => null,
+                'pages' => []
+            ]);
+        }
 
         $pages = [];
 
-        foreach ($images as $file) {
+        $images_path = public_path('images/' . $article_id);
+
+        foreach (File::all_files($images_path) as $file) {
             $filename = pathinfo($file->getPathname(), PATHINFO_FILENAME);
 
             if (Str::starts_with($filename, 'page_medium')) {
                 $id = Str::replace(['page_medium' => ''], $filename);
-
-                File::copy($file->getPathname(), $path = public_path('temp/page_medium_' . $id . '.jpg'));
-
-                $pages[$id]['image']['medium'] = $path;
+                $pages[$id]['image']['medium'] = $file->getPathname();
 
                 continue;
             }
 
             if (Str::starts_with($filename, 'page_thumb')) {
                 $id = Str::replace(['page_thumb' => ''], $filename);
-
-                File::copy($file->getPathname(), $path = public_path('temp/page_thumb_' . $id . '.jpg'));
-
-                $pages[$id]['image']['small'] = $path;
+                $pages[$id]['image']['small'] = $file->getPathname();
 
                 continue;
             }
 
             $id = Str::replace(['page' => ''], $filename);
 
-            File::copy($file->getPathname(), $path = public_path('temp/page_' . $id . '.jpg'));
-
             $pages[$id] = [
                 'image' => [
-                    'large' => $path
+                    'large' => $file->getPathname()
                 ],
                 'file' => [
                     'path' => '',
@@ -61,7 +64,9 @@ class DefaultController extends Controller
             ];
         }
 
-        foreach ($contents as $file) {
+        $contents_path = public_path('html/' . $article_id);
+
+        foreach (File::all_files($contents_path) as $file) {
             $filename = pathinfo($file->getPathname(), PATHINFO_FILENAME);
 
             $id = Str::replace(['page' => ''], $filename);
@@ -73,7 +78,24 @@ class DefaultController extends Controller
         }
 
         return view('default', [
+            'article_id' => $article_id,
             'pages' => $pages
         ]);
+    }
+
+    /**
+     * Content view.
+     *
+     * @param Request $request
+     * @return string|null
+     */
+    public function content(Request $request): ?string
+    {
+        $article_id = $request->get('article_id');
+        $id = $request->get('id');
+
+        $path = public_path('html/' . $article_id . '/page' . $id . '.html');
+
+        return File::read($path);
     }
 }
